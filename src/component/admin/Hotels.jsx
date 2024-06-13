@@ -27,7 +27,6 @@ import axios from "axios";
 //   });
 // }
 
-
 const EditableCell = ({
   editing, // Xác định xem ô này có đang ở chế độ chỉnh sửa hay không
   dataIndex, // Tên thuộc tính của dữ liệu (ví dụ: 'name', 'age', 'address')
@@ -46,8 +45,8 @@ const EditableCell = ({
   } else if (dataIndex === "status") {
     inputNode = (
       <Select>
-        <Select.Option value="active">Active</Select.Option>
-        <Select.Option value="inactive">Inactive</Select.Option>
+        <Select.Option value="ACTIVE">ACTIVE</Select.Option>
+        <Select.Option value="INACTIVE">INACTIVE</Select.Option>
       </Select>
     );
   } else {
@@ -88,11 +87,13 @@ const Hotels = () => {
       try {
         const response = await axios.get("http://localhost:8080/api/hotels");
         const fetchedData = response.data
-        .filter((item) => item.status === "ACTIVE") // Lọc chỉ giữ lại các khách sạn có trạng thái là "active"
-        .map((item) => ({
-          key: item.hotelId.toString(),
-          ...item,
-        }));
+          .filter(
+            (item) => item.status === "ACTIVE" || item.status === "INACTIVE"
+          ) // Lọc chỉ giữ lại các khách sạn có trạng thái là "active"
+          .map((item) => ({
+            key: item.id.toString(),
+            ...item,
+          }));
         setData(fetchedData);
         console.log(fetchedData);
       } catch (error) {
@@ -105,12 +106,13 @@ const Hotels = () => {
   const isEditing = (record) => record.key === editingKey;
   const edit = (record) => {
     form.setFieldsValue({
-      firstname: "",
-      lastname: "",
-      email: "",
-      phoneNum: "",
-      gender: "",
-      age: "",
+      hotelName: "",
+      address: "",
+      city: "",
+      hotelStars: "",
+      hotelPhoneNum: "",
+      checkInTime: "",
+      checkOutTime: "",
       status: "",
       ...record,
     });
@@ -121,8 +123,13 @@ const Hotels = () => {
   };
   const save = async (key) => {
     try {
-      const row = await form.validateFields();
+      const row1 = await form.validateFields();
+      const row = {...row1, id: key};
+      console.log(row);
+      console.log(`Saving data for key ${key} to:`, `http://localhost:8080/api/hotels/staff/update/${key}`);
+      await axios.put(`http://localhost:8080/api/hotels/staff/update/${key}`, row);
       const newData = [...data];
+      console.log(row);
       const index = newData.findIndex((item) => key === item.key);
       if (index > -1) {
         const item = newData[index];
@@ -155,8 +162,6 @@ const Hotels = () => {
     clearFilters();
     setSearchText("");
   };
-
-  
 
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
@@ -261,10 +266,15 @@ const Hotels = () => {
       ),
   });
 
-  
-
   //set columns
   const columns = [
+    {
+      title: "Index",
+      dataIndex: "index",
+      key: "index",
+      render: (text, record, index) => index + 1,
+      width: "5%",
+    },
     {
       title: "Hotel Name",
       dataIndex: "hotelName",
@@ -278,6 +288,13 @@ const Hotels = () => {
       width: "15%",
       editable: false,
       ...getColumnSearchProps("address"),
+    },
+    {
+      title: "City",
+      dataIndex: "city",
+      width: "5%",
+      editable: false,
+      ...getColumnSearchProps("city"),
     },
     {
       title: "Stars",
@@ -296,18 +313,18 @@ const Hotels = () => {
     {
       title: "checkInTime",
       dataIndex: "checkInTime",
-      width: "15%",
+      width: "10%",
       editable: false,
       ...getColumnSearchProps("checkInTime"),
     },
     {
       title: "checkOutTime",
       dataIndex: "checkOutTime",
-      width: "15%",
+      width: "10%",
       editable: false,
       ...getColumnSearchProps("checkOutTime"),
     },
-   
+
     {
       title: "Status",
       dataIndex: "status",
@@ -360,26 +377,27 @@ const Hotels = () => {
     };
   });
 
-
   const clearFiltersAndSorters = () => {
     // Xóa tất cả các filters
     setSearchText("");
     setSearchedColumn("");
-  
+
     // Xóa tất cả các sorters
     // Cập nhật lại state của data để hiển thị lại dữ liệu gốc
     // Lấy dữ liệu gốc
-  // let newData = [...originData];
+    // let newData = [...originData];
 
-  // // Cập nhật lại state của data để hiển thị lại dữ liệu gốc
-  // setData(newData);
-  // console.log(newData);
+    // // Cập nhật lại state của data để hiển thị lại dữ liệu gốc
+    // setData(newData);
+    // console.log(newData);
   };
-  
+
   return (
     <Form form={form} component={false}>
       <Space style={{ marginBottom: 16 }}>
-        <Button onClick={() => clearFiltersAndSorters()}>Clear filters and sorters</Button>
+        <Button onClick={() => clearFiltersAndSorters()}>
+          Clear filters and sorters
+        </Button>
 
         {/* Rest of your UI */}
       </Space>

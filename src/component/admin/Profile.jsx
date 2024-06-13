@@ -56,8 +56,8 @@ export default function Profile() {
   };
 
   return (
-    <div className="mt-10 sm:mx-auto sm:w-full max-w-lg p-6 bg-white shadow-lg rounded-lg border-2 border-gray-300">
-      <Form layout="vertical">
+    <div className="mt-10 sm:mx-auto sm:w-full max-w-md p-6 bg-white shadow-lg rounded-lg border-2 border-gray-300">
+      <Form layout="vertical" className="bg-white p-8 shadow-md rounded space-y-6">
         <h2 className="text-center text-2xl font-bold mb-4">My Profile</h2>
         {/* First Name */}
         <Form.Item label="First Name">

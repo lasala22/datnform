@@ -46,11 +46,11 @@ const EditableCell = ({
   let inputNode;
   if (inputType === "number") {
     inputNode = <InputNumber />;
-  } else if (dataIndex === "status") {
+  } else if (dataIndex === "enabled") {
     inputNode = (
       <Select>
-        <Select.Option value="true">Active</Select.Option>
-        <Select.Option value="false">Inactive</Select.Option>
+        <Select.Option value={true}>ACTIVE</Select.Option>
+        <Select.Option value={false}>INACTIVE</Select.Option>
       </Select>
     );
   } else {
@@ -91,9 +91,16 @@ const Customer = () => {
     // Fetch data from API
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/api/customers");
-        const fetchedData = response.data.map((item, index) => ({
-          key: item.customerId.toString(),
+        const response = await axios.get("http://localhost:8080/api/accounts");
+        const fetchedData = response.data
+        .filter(item => item.roles.some(role => role.name === "CUSTOMER")) // Lọc các tài khoản có role là "CUSTOMER"
+        .map((item, index) => ({
+          key: item.id.toString(),
+          firstName: item.user.firstName,
+          lastName: item.user.lastName,
+          gender: item.user.gender,
+          dob: item.user.dob,
+          enabled: item.enabled,
           ...item,
         }));
         setData(fetchedData);
@@ -115,7 +122,7 @@ const Customer = () => {
       phoneNum: "",
       gender: "",
       age: "",
-      status: "",
+      enabled: "",
       ...record,
     });
     setEditingKey(record.key);
@@ -125,18 +132,20 @@ const Customer = () => {
   };
   const save = async (key) => {
     try {
-      const row = await form.validateFields();
+      const row1 = await form.validateFields();
+      const row = {...row1, id: key};
+      console.log(row);
+      console.log(`Saving data for key ${key} to:`, `http://localhost:8080/api/accounts/update/${key}`);
+      await axios.put(`http://localhost:8080/api/accounts/update/${key}`, row);
       const newData = [...data];
       const index = newData.findIndex((item) => key === item.key);
       if (index > -1) {
         const item = newData[index];
-        const updatedItem = { ...item, ...row };
-        // Send a PUT request to update the customer in the database
-        await axios.put(`http://localhost:8080/api/customers/${item.customerId}`, updatedItem);
         newData.splice(index, 1, {
           ...item,
           ...row,
         });
+        console.log(newData);
         setData(newData);
         setEditingKey("");
       } else {
@@ -289,7 +298,7 @@ const Customer = () => {
     {
       title: "Email",
       dataIndex: "email",
-      width: "20%",
+      width: "15%",
       editable: false,
       ...getColumnSearchProps("email"),
     },
@@ -312,20 +321,20 @@ const Customer = () => {
       onFilter: (value, record) => record.gender === value,
     },
     {
-      title: "Age",
-      dataIndex: "age",
-      width: "8%",
+      title: "Date of birth",
+      dataIndex: "dob",
+      width: "10%",
       editable: false,
-      ...getColumnSearchProps("age"),
-      sorter: (a, b) => a.age - b.age,
+      ...getColumnSearchProps("dob"),
+      sorter: (a, b) => new Date(a.dob) - new Date(b.dob),
       sortDirections: ["descend", "ascend"],
     },
     {
       title: "Status",
-      dataIndex: "status",
+      dataIndex: "enabled",
       width: "10%",
       editable: true,
-      render: (status) => (status ? "Active" : "Inactive")
+      render: (enabled) => (enabled ? "ACTIVE" : "INACTIVE")
     },
     {
       title: "operation",

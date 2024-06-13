@@ -9,6 +9,7 @@ import Signup from './component/Signup';
 import './index.css';
 import Sidebar from './component/admin/Sidebar';
 import Sidebar2 from './component/admin/Sidebar2';
+import SidebarProfile from './component/profile/SidebarProfile';
 
 function App() {
   return (
@@ -17,7 +18,8 @@ function App() {
       <Route path='/' element={<Login />}></Route>
       <Route path='/signup' element={<Signup />}></Route>
       <Route path='/admin' element={<Sidebar />}></Route>
-      <Route path='/sidebar2' element={<Sidebar2 />}></Route>
+      <Route path='/staff' element={<Sidebar2 />}></Route>
+      <Route path='/customer/profile' element={<SidebarProfile />}></Route>
     </Routes>
    </BrowserRouter>
   );

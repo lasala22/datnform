@@ -1,12 +1,27 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Input, Button, message } from "antd";
 
 import axios from "axios";
 import "tailwindcss/tailwind.css";
+import { jwtDecode } from "jwt-decode";
+
+
 export default function NewPass() {
+
+  const [tokenKey, setTokenKey] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      setTokenKey(decodedToken.id);
+    }
+  }, []);
+
+
   const onFinish = (values) => {
     axios
-      .put("http://localhost:8080/api/accounts/3/change-pass", {
+      .put(`http://localhost:8080/api/accounts/${tokenKey}/change-pass`, {
         oldPassword: values.currentPassword,
         newPassword: values.newPassword,
         confPassword: values.confirmPassword,

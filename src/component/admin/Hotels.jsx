@@ -80,9 +80,10 @@ const Hotels = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
   const [editingKey, setEditingKey] = useState("");
+  const [roomsData, setRoomsData] = useState({});
 
   useEffect(() => {
-    // Fetch data from API
+    // Fetch hotels data from API
     const fetchData = async () => {
       try {
         const response = await axios.get("http://localhost:8080/api/hotels");
@@ -95,12 +96,42 @@ const Hotels = () => {
             ...item,
           }));
         setData(fetchedData);
-        console.log(fetchedData);
+        // console.log(fetchedData);
       } catch (error) {
         console.error("Error fetching data: ", error);
       }
     };
+
+    // Fetch room data from API
+    const fetchRoomData = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/api/rooms");
+        const fetchedRoomData = response.data.reduce((acc, room) => {
+          const hotelId = room.hotel.id.toString();
+          if (!acc[hotelId]) {
+            acc[hotelId] = [];
+          }
+          acc[hotelId].push({
+            key: room.id.toString(),
+            roomNumber: room.id,
+            roomType: room.roomType.typeName,
+            price: room.price,
+            capacity: room.capacity,
+            quantity: room.quantity,
+            roomSize: room.roomSize,
+          });
+
+          return acc;
+        }, {});
+        setRoomsData(fetchedRoomData);
+        // console.log( fetchedRoomData);
+      } catch (error) {
+        console.error("Error fetching room data: ", error);
+      }
+    };
+
     fetchData();
+    fetchRoomData();
   }, []);
 
   const isEditing = (record) => record.key === editingKey;
@@ -124,12 +155,17 @@ const Hotels = () => {
   const save = async (key) => {
     try {
       const row1 = await form.validateFields();
-      const row = {...row1, id: key};
+      const row = { ...row1, id: key };
       console.log(row);
-      console.log(`Saving data for key ${key} to:`, `http://localhost:8080/api/hotels/staff/update/${key}`);
-      await axios.put(`http://localhost:8080/api/hotels/staff/update/${key}`, row);
+      console.log(
+        `Saving data for key ${key} to:`,
+        `http://localhost:8080/api/hotels/staff/update/${key}`
+      );
+      await axios.put(
+        `http://localhost:8080/api/hotels/staff/update/${key}`,
+        row
+      );
       const newData = [...data];
-      console.log(row);
       const index = newData.findIndex((item) => key === item.key);
       if (index > -1) {
         const item = newData[index];
@@ -391,6 +427,52 @@ const Hotels = () => {
     // setData(newData);
     // console.log(newData);
   };
+  const expandedRowRender = (record) => {
+    const columns = [
+      // {
+      //   title: "Số phòng",
+      //   dataIndex: "roomNumber",
+      //   key: "roomNumber",
+      // },
+      {
+        title: "Loại phòng",
+        dataIndex: "roomType",
+        key: "roomType",
+      },
+      {
+        title: "Giá",
+        dataIndex: "price",
+        key: "price",
+        render: (text) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(text),
+      },
+      {
+        title: "Sức chứa",
+        dataIndex: "capacity",
+        key: "capacity",
+      },
+
+      {
+        title: "Số lượng",
+        dataIndex: "quantity",
+        key: "quantity",
+      },
+      {
+        title: "Diện tích",
+        dataIndex: "roomSize",
+        key: "roomSize",
+        render: (text) => `${text} m²`,
+      },
+    ];
+    // Log dữ liệu dataSource
+    console.log("Data source for expanded row:", roomsData[record.key]);
+    return (
+      <Table
+        columns={columns}
+        dataSource={roomsData[record.key]}
+        pagination={false}
+      />
+    );
+  };
 
   return (
     <Form form={form} component={false}>
@@ -413,6 +495,10 @@ const Hotels = () => {
         rowClassName="editable-row"
         pagination={{
           onChange: cancel,
+        }}
+        expandable={{
+          expandedRowRender,
+          defaultExpandedRowKeys: ["0"],
         }}
         scroll={{
           y: 600,

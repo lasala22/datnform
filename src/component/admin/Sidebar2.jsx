@@ -7,7 +7,7 @@ import {
   UserOutlined,
   HomeOutlined,
   CheckSquareOutlined,
-  AppstoreOutlined
+  AppstoreOutlined,
 } from "@ant-design/icons";
 import { Breadcrumb, Layout, Menu, theme } from "antd";
 import Dashboard from "./Dashboard";
@@ -16,7 +16,11 @@ import Customer from "./Customer";
 import Partner from "./Partner";
 import Hotelcensorship from "./Hotelcensorship";
 import Hotels from "./Hotels";
-import Rooms from "./Rooms"
+
+import Bookings from "./Bookings";
+import StatisticsHotel from "./StatisticsHotel";
+import StatisticsRoom from "./StatisticsRoom";
+import StatisticsRevenue from "./StatisticsRevenue";
 const { Header, Content, Footer, Sider } = Layout;
 function getItem(label, key, icon, children) {
   return {
@@ -35,12 +39,13 @@ const items = [
   ]),
   getItem("Hotel management", "hotelmanagement1", <HomeOutlined />, [
     getItem("Hotels", "hotel1"),
-    getItem("Rooms", "room1"),
+    getItem("Bookings", "booking1"),
   ]),
-  getItem("Hotel censorship", "hotelcensorship1",<CheckSquareOutlined />),
+  getItem("Hotel censorship", "hotelcensorship1", <CheckSquareOutlined />),
   getItem("Statistics", "statistics1", <PieChartOutlined />, [
     getItem("Hotels", "hotelstatistics"),
     getItem("Rooms", "roomstatistics"),
+    getItem("Revenue", "revenuetatistics"),
   ]),
 ];
 
@@ -51,13 +56,14 @@ const Sidebar2 = () => {
   } = theme.useToken();
 
   const [selectedKeys, setSelectedKeys] = useState(["dashboard1"]);
-  const [breadcrumbItems, setBreadcrumbItems] = useState([{ title: "Dashboard" }]);
+  const [breadcrumbItems, setBreadcrumbItems] = useState([
+    { title: "Dashboard" },
+  ]);
 
-  
-// keyPath: Một mảng chứa các key của các mục menu từ mục con đến mục cha.
-// keyPath.reverse() đảo ngược mảng keyPath để có thứ tự từ mục cha đến mục con.
+  // keyPath: Một mảng chứa các key của các mục menu từ mục con đến mục cha.
+  // keyPath.reverse() đảo ngược mảng keyPath để có thứ tự từ mục cha đến mục con.
 
-const handleMenuClick = ({ key, keyPath }) => {
+  const handleMenuClick = ({ key, keyPath }) => {
     const itemPath = keyPath.reverse();
     const breadcrumbPath = itemPath.map((key) => {
       const item = findMenuItem(items, key);
@@ -66,7 +72,6 @@ const handleMenuClick = ({ key, keyPath }) => {
     setSelectedKeys(itemPath);
 
     setBreadcrumbItems(breadcrumbPath);
-   
   };
 
   const findMenuItem = (menuItems, key) => {
@@ -86,7 +91,6 @@ const handleMenuClick = ({ key, keyPath }) => {
 
   const renderContent = () => {
     switch (selectedKeys[selectedKeys.length - 1]) {
-        
       case "dashboard1":
         return <Dashboard />;
       case "profile1":
@@ -97,19 +101,21 @@ const handleMenuClick = ({ key, keyPath }) => {
         return <Partner />;
       case "hotel1":
         return <Hotels />;
-      case "room1":
-        return <Rooms />;
+      case "booking1":
+        return <Bookings />;
       case "hotelcensorship1":
         return <Hotelcensorship />;
-    //   case "statistics_hotel1":
-    //     return <StatisticsHotel />;
-    //   case "statistics_room1":
-    //     return <StatisticsRoom />;
+      case "hotelstatistics":
+        return <StatisticsHotel />;
+      case "roomstatistics":
+        return <StatisticsRoom />;
+      case "revenuetatistics":
+        return <StatisticsRevenue />;
       default:
         return <Dashboard />;
     }
   };
-  
+
   return (
     <Layout
       style={{
@@ -137,8 +143,7 @@ const handleMenuClick = ({ key, keyPath }) => {
             background: colorBgContainer,
           }}
         />
-        
-        
+
         <Content
           style={{
             margin: "0 16px",
@@ -157,14 +162,14 @@ const handleMenuClick = ({ key, keyPath }) => {
             {renderContent()}
           </div>
         </Content>
-        
-        
+
         <Footer
           style={{
             textAlign: "center",
           }}
         >
-          Vootreeveevuu Design ©{new Date().getFullYear()} Created by Vootree Team
+          Vootreeveevuu Design ©{new Date().getFullYear()} Created by Vootree
+          Team
         </Footer>
       </Layout>
     </Layout>

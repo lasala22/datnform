@@ -9,12 +9,13 @@ import {
   Tabs,
   Flex,
   Upload,
-  Space
+  Space,
 } from "antd";
 
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import axios from "axios";
 import moment from "moment";
+import { jwtDecode } from "jwt-decode";
 const { Option } = Select;
 const { TabPane } = Tabs;
 
@@ -41,46 +42,64 @@ const MyProfile = () => {
   const [emailForm] = Form.useForm();
   const [phoneForm] = Form.useForm();
   const [initialValues, setInitialValues] = useState(null);
+  const [tokenKey, setTokenKey] = useState(null);
 
   useEffect(() => {
-    // Lấy dữ liệu từ API cho username
-    const fetchBasicInfo = axios.get("http://localhost:8080/api/accounts/3"); // Điều chỉnh URL thành endpoint API thực tế của bạn
+    const token = localStorage.getItem("token");
 
-    // Lấy dữ liệu từ API cho các thuộc tính còn lại
-    const fetchProfile = axios.get("http://localhost:8080/api/users/3"); // Điều chỉnh URL thành endpoint API thực tế của bạn
+    if (token) {
+      const decodedToken = jwtDecode(token);
 
-    // Kết hợp dữ liệu từ hai API
-    Promise.all([fetchBasicInfo, fetchProfile])
-      .then(([basicInfoResponse, profileResponse]) => {
-        const basicInfo = basicInfoResponse.data;
-        const profile = profileResponse.data;
+      setTokenKey(decodedToken.id);
+      console.log(decodedToken.id);
+    }
+  }, []);
 
-        // Định dạng dữ liệu cho biểu mẫu
-        setInitialValues({
-          username: basicInfo.username,
-          email: basicInfo.email,
-          phoneNum: basicInfo.phoneNum,
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          dayOfBirth: profile.dob ? moment(profile.dob) : null,
-          gender: profile.gender,
+  useEffect(() => {
+    if (tokenKey) {
+      // Lấy dữ liệu từ API cho username
+      const fetchBasicInfo = axios.get(
+        `http://localhost:8080/api/accounts/${tokenKey}`
+      ); // Điều chỉnh URL thành endpoint API thực tế của bạn
+
+      // Lấy dữ liệu từ API cho các thuộc tính còn lại
+      const fetchProfile = axios.get(
+        `http://localhost:8080/api/users/${tokenKey}`
+      ); // Điều chỉnh URL thành endpoint API thực tế của bạn
+
+      // Kết hợp dữ liệu từ hai API
+      Promise.all([fetchBasicInfo, fetchProfile])
+        .then(([basicInfoResponse, profileResponse]) => {
+          const basicInfo = basicInfoResponse.data;
+          const profile = profileResponse.data;
+
+          // Định dạng dữ liệu cho biểu mẫu
+          setInitialValues({
+            username: basicInfo.username,
+            email: basicInfo.email,
+            phoneNum: basicInfo.phoneNum,
+            firstName: profile.firstName,
+            lastName: profile.lastName,
+            dayOfBirth: profile.dob ? moment(profile.dob) : null,
+            gender: profile.gender,
+          });
+
+          // Đặt giá trị cho biểu mẫu
+          form.setFieldsValue({
+            username: basicInfo.username,
+            email: basicInfo.email,
+            phoneNum: basicInfo.phoneNum,
+            firstName: profile.firstName,
+            lastName: profile.lastName,
+            dayOfBirth: profile.dob ? moment(profile.dob) : null,
+            gender: profile.gender,
+          });
+        })
+        .catch((error) => {
+          console.error("Có lỗi xảy ra khi lấy dữ liệu hồ sơ!", error);
         });
-
-        // Đặt giá trị cho biểu mẫu
-        form.setFieldsValue({
-          username: basicInfo.username,
-          email: basicInfo.email,
-          phoneNum: basicInfo.phoneNum,
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          dayOfBirth: profile.dob ? moment(profile.dob) : null,
-          gender: profile.gender,
-        });
-      })
-      .catch((error) => {
-        console.error("Có lỗi xảy ra khi lấy dữ liệu hồ sơ!", error);
-      });
-  }, [form]);
+    }
+  }, [form, tokenKey]);
 
   const onFinish = (values) => {
     // Chỉ lấy các trường cần cập nhật
@@ -93,7 +112,7 @@ const MyProfile = () => {
     console.log(updatedData);
     // Gửi dữ liệu đến API
     axios
-      .put("http://localhost:8080/api/users/update/3", updatedData) // Điều chỉnh URL thành endpoint API thực tế của bạn
+      .put(`http://localhost:8080/api/users/update/${tokenKey}`, updatedData) // Điều chỉnh URL thành endpoint API thực tế của bạn
       .then((response) => {
         message.success("Thông tin đã được cập nhật thành công!");
       })
@@ -188,6 +207,7 @@ const MyProfile = () => {
     });
 
     // Gửi yêu cầu OTP với cả Current Email và New Email
+
     axios
       .post(
         `http://localhost:8080/api/phone/change-request?email=${currentEmail}&curPhoneNum=${currentPhone}&newPhoneNum=${newPhone}`
@@ -203,7 +223,15 @@ const MyProfile = () => {
 
   // xu ly hinh
   const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState("http://localhost:8080/api/accounts/3/avatar");
+
+  const [imageUrl, setImageUrl] = useState(null);
+
+  useEffect(() => {
+    if (tokenKey) {
+      setImageUrl(`http://localhost:8080/api/accounts/${tokenKey}/avatar`);
+    }
+  }, [tokenKey]);
+
   const handleChange = (info) => {
     if (info.file.status === "uploading") {
       setLoading(true);
@@ -218,7 +246,6 @@ const MyProfile = () => {
     }
   };
 
- 
   const uploadButton = (
     <button
       style={{
@@ -251,15 +278,14 @@ const MyProfile = () => {
             </p>
 
             {/* hinh anh */}
-            
+
             <Flex className="mb-11" gap="middle" wrap>
-            
               <Upload
                 name="avatar"
                 listType="picture-card"
                 className="avatar-uploader"
                 showUploadList={false}
-                action="http://localhost:8080/api/accounts/3/avatar"
+                action={`http://localhost:8080/api/accounts/${tokenKey}/avatar`}
                 beforeUpload={beforeUpload}
                 onChange={handleChange}
               >
@@ -275,9 +301,8 @@ const MyProfile = () => {
                   uploadButton
                 )}
               </Upload>
-              
             </Flex>
-            
+
             <Form
               layout="vertical"
               form={form}

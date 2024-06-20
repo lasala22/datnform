@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import logoPreview2 from "../logo/logo_preview_rev_2.png";
+import logoPreview2 from "../../logo/logo-partner.png";
 import {
   AutoComplete,
   Button,
@@ -11,9 +11,15 @@ import {
   InputNumber,
   Row,
   Select,
+  DatePicker,
+  message
 } from "antd";
 import { GoogleOutlined, FacebookOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
+import axios from "axios";
+import 'tailwindcss/tailwind.css';
 const { Option } = Select;
+
 
 const formItemLayout = {
   labelCol: {
@@ -45,10 +51,37 @@ const tailFormItemLayout = {
     },
   },
 };
-const Signup = () => {
+
+const dateFormatList = ["DD/MM/YYYY", "DD-MM-YYYY"];
+
+
+const SignupPartner = () => {
   const [form] = Form.useForm();
-  const onFinish = (values) => {
-    console.log("Received values of form: ", values);
+  const [roles, setRoles] = useState(["PARTNER"]);
+
+  const onFinish = async (values) => {
+    const newValues = { ...values, roles };
+    console.log(newValues);
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/auth/register",
+        newValues
+      );
+      
+      console.log("Response:", response);
+      if (response && response.status === 200) {
+        message.success("Registration successful!");
+        console.log("success");
+      } else {
+        const errorMessage = response?.data?.error || "An unknown error occurred";
+        message.error(errorMessage);
+        console.error(errorMessage);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || "Registration failed!";
+      message.error(errorMessage);
+      console.error(errorMessage);
+    }
   };
   const prefixSelector = (
     <Form.Item name="prefix" noStyle>
@@ -70,7 +103,7 @@ const Signup = () => {
       </div>
       <div className="sm:mx-auto sm:w-full sm:max-w-sm text-center mt-10">
         <h2 className="text-2xl font-bold leading-9 tracking-tight text-gray-900">
-          Create your account
+          Create your partner account
         </h2>
       </div>
       <div className="mt-10 sm:mx-auto sm:w-full max-w-md ">
@@ -98,33 +131,7 @@ const Signup = () => {
               },
             ]}
           >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="firstname"
-            label="First Name"
-            rules={[
-              {
-                required: true,
-                message: "Please input your first name",
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="lastname"
-            label="Last Name"
-            rules={[
-              {
-                required: true,
-                message: "Please input your last name",
-              },
-            ]}
-          >
-            <Input />
+            <Input className="rounded-md" />
           </Form.Item>
 
           <Form.Item
@@ -141,7 +148,7 @@ const Signup = () => {
               },
             ]}
           >
-            <Input />
+            <Input className="rounded-md" />
           </Form.Item>
 
           <Form.Item
@@ -155,7 +162,7 @@ const Signup = () => {
             ]}
             hasFeedback
           >
-            <Input.Password />
+            <Input.Password className="rounded-md" size="large"/>
           </Form.Item>
 
           <Form.Item
@@ -180,9 +187,20 @@ const Signup = () => {
               }),
             ]}
           >
-            <Input.Password />
+            <Input.Password className="rounded-md" size="large" />
           </Form.Item>
-
+          <Form.Item
+            name="dob"
+            label="Date of birth"
+            rules={[
+              {
+                required: true,
+                message: "Please choose your birthday!",
+              },
+            ]}
+          >
+            <DatePicker format={dateFormatList} className="rounded-md" size="large"/>
+          </Form.Item>
           <Form.Item
             name="phone"
             label="Phone Number"
@@ -194,54 +212,13 @@ const Signup = () => {
             ]}
           >
             <Input
-              addonBefore={prefixSelector}
+              // addonBefore={prefixSelector}
+              className="rounded-md"
               style={{
                 width: "100%",
               }}
             />
           </Form.Item>
-
-          <Form.Item
-            name="gender"
-            label="Gender"
-            rules={[
-              {
-                required: true,
-                message: "Please select gender!",
-              },
-            ]}
-          >
-            <Select placeholder="select your gender">
-              <Option value="male">Male</Option>
-              <Option value="female">Female</Option>
-              <Option value="other">Other</Option>
-            </Select>
-          </Form.Item>
-
-          {/* <Form.Item
-            label="Captcha"
-            extra="We must make sure that your are a human."
-          >
-            <Row gutter={8}>
-              <Col span={12}>
-                <Form.Item
-                  name="captcha"
-                  noStyle
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please input the captcha you got!",
-                    },
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Button>Get captcha</Button>
-              </Col>
-            </Row>
-          </Form.Item> */}
 
           <Form.Item
             name="agreement"
@@ -331,4 +308,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default SignupPartner;

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { LockOutlined, UserOutlined,GoogleOutlined, FacebookOutlined } from "@ant-design/icons";
 import { Button, Form, Input } from "antd";
 import logoPreview2 from "../logo/logo_preview_rev_2.png";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
   const [form] = Form.useForm();
@@ -9,10 +11,35 @@ const Login = () => {
 
   // To disable submit button at the beginning.
   useEffect(() => {
+   
     setClientReady(true);
   }, []);
-  const onFinish = (values) => {
-    console.log("Finish:", values);
+  const onFinish = async (values) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/auth/login",
+        values
+      );
+      localStorage.setItem("token", response.data.token);
+
+      const decodeToken = jwtDecode(response.data.token);
+      console.log(decodeToken);
+      const tokenRole = decodeToken.roles;
+      if (tokenRole[0] == "PARTNER") {
+        // router.push("/partner/home");
+        console.log("login partner");
+      } else if (tokenRole[0] == "CUSTOMER") {
+        // router.push("/home");
+        console.log("login customer");
+      }
+      else if (tokenRole[0] == "STAFF") {
+        // router.push("/home");
+        console.log("login staff");
+      }
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    }
   };
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center ">

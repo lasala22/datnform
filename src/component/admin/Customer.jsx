@@ -282,16 +282,23 @@ const Customer = () => {
   //set columns
   const columns = [
     {
+      title: "Index",
+      dataIndex: "index",
+      key: "index",
+      render: (text, record, index) => index + 1,
+      width: "5%",
+    },
+    {
       title: "First Name",
       dataIndex: "firstName",
-      width: "15%",
+      width: "10%",
       editable: false,
       ...getColumnSearchProps("firstName"),
     },
     {
       title: "Last Name",
       dataIndex: "lastName",
-      width: "15%",
+      width: "10%",
       editable: false,
       ...getColumnSearchProps("lastName"),
     },

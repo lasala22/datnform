@@ -83,8 +83,9 @@ export default function HistoryBooking() {
           return (
             <Card
               key={id}
-              title={<span className="text-black">{hotelName}</span>}
+              title={<span className="text-black "><HomeOutlined /> {hotelName}</span>}
               style={{ width: "100%" }}
+              className="border-2 border-sky-500 shadow-lg "
             >
               <div className="grid grid-cols-3 gap-4">
                 <p className="text-lg font-semibold mb-2">

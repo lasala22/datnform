@@ -27,7 +27,6 @@ import axios from "axios";
 //   });
 // }
 
-
 const EditableCell = ({
   editing, // Xác định xem ô này có đang ở chế độ chỉnh sửa hay không
   dataIndex, // Tên thuộc tính của dữ liệu (ví dụ: 'name', 'age', 'address')
@@ -89,11 +88,11 @@ const Hotelcensorship = () => {
       try {
         const response = await axios.get("http://localhost:8080/api/hotels");
         const fetchedData = response.data
-        .filter((item) => item.status === "PENDING") // Lọc chỉ giữ lại các khách sạn có trạng thái là "active"
-        .map((item) => ({
-          key: item.id.toString(),
-          ...item,
-        }));
+          .filter((item) => item.status === "PENDING") // Lọc chỉ giữ lại các khách sạn có trạng thái là "active"
+          .map((item) => ({
+            key: item.id.toString(),
+            ...item,
+          }));
         setData(fetchedData);
         // console.log(fetchedData);
       } catch (error) {
@@ -119,7 +118,7 @@ const Hotelcensorship = () => {
             quantity: room.quantity,
             roomSize: room.roomSize,
           });
-          
+
           return acc;
         }, {});
         setRoomsData(fetchedRoomData);
@@ -132,9 +131,6 @@ const Hotelcensorship = () => {
     fetchData();
     fetchRoomData();
   }, []);
-
-
-  
 
   const isEditing = (record) => record.key === editingKey;
   const edit = (record) => {
@@ -157,10 +153,16 @@ const Hotelcensorship = () => {
   const save = async (key) => {
     try {
       const row1 = await form.validateFields();
-      const row = {...row1, id: key};
+      const row = { ...row1, id: key };
       console.log(row);
-      console.log(`Saving data for key ${key} to:`, `http://localhost:8080/api/hotels/staff/update/${key}`);
-      await axios.put(`http://localhost:8080/api/hotels/staff/update/${key}`, row);
+      console.log(
+        `Saving data for key ${key} to:`,
+        `http://localhost:8080/api/hotels/staff/update/${key}`
+      );
+      await axios.put(
+        `http://localhost:8080/api/hotels/staff/update/${key}`,
+        row
+      );
       const newData = [...data].filter((item) => item.status === "PENDING");
       const index = newData.findIndex((item) => key === item.key);
       if (index > -1) {
@@ -194,8 +196,6 @@ const Hotelcensorship = () => {
     clearFilters();
     setSearchText("");
   };
-
-  
 
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
@@ -300,8 +300,6 @@ const Hotelcensorship = () => {
       ),
   });
 
-  
-
   //set columns
   const columns = [
     {
@@ -360,7 +358,7 @@ const Hotelcensorship = () => {
       editable: false,
       ...getColumnSearchProps("checkOutTime"),
     },
-   
+
     {
       title: "Status",
       dataIndex: "status",
@@ -413,20 +411,14 @@ const Hotelcensorship = () => {
     };
   });
 
-
   const clearFiltersAndSorters = () => {
-    // Xóa tất cả các filters
+    // Xóa tất cả các filters và sorters bằng cách đặt lại giá trị state
     setSearchText("");
     setSearchedColumn("");
-  
-    // Xóa tất cả các sorters
-    // Cập nhật lại state của data để hiển thị lại dữ liệu gốc
-    // Lấy dữ liệu gốc
-  // let newData = [...originData];
 
-  // // Cập nhật lại state của data để hiển thị lại dữ liệu gốc
-  // setData(newData);
-  // console.log(newData);
+    // Gọi hàm handleSearch với selectedKeys là mảng rỗng để xóa bộ lọc
+    const selectedKeys = [];
+    handleSearch(selectedKeys, () => {}, searchedColumn);
   };
   const expandedRowRender = (record) => {
     const columns = [
@@ -460,16 +452,15 @@ const Hotelcensorship = () => {
         title: "Diện tích",
         dataIndex: "roomSize",
         key: "roomSize",
-         render: (text) => `${text} m²`
+        render: (text) => `${text} m²`,
       },
     ];
-// Log dữ liệu dataSource
-console.log("Data source for expanded row:", roomsData[record.key]);
+    // Log dữ liệu dataSource
+    console.log("Data source for expanded row:", roomsData[record.key]);
     return (
       <Table
         columns={columns}
         dataSource={roomsData[record.key]}
-        
         pagination={false}
       />
     );
@@ -478,7 +469,9 @@ console.log("Data source for expanded row:", roomsData[record.key]);
   return (
     <Form form={form} component={false}>
       <Space style={{ marginBottom: 16 }}>
-        <Button onClick={() => clearFiltersAndSorters()}>Clear filters and sorters</Button>
+        <Button onClick={() => clearFiltersAndSorters()}>
+          Clear filters and sorters
+        </Button>
 
         {/* Rest of your UI */}
       </Space>
@@ -495,7 +488,6 @@ console.log("Data source for expanded row:", roomsData[record.key]);
         pagination={{
           onChange: cancel,
         }}
-
         expandable={{
           expandedRowRender,
           defaultExpandedRowKeys: ["0"],

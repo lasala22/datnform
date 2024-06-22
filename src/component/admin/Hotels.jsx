@@ -414,19 +414,27 @@ const Hotels = () => {
   });
 
   const clearFiltersAndSorters = () => {
-    // Xóa tất cả các filters
+    // // Duyệt qua từng cột trong columns
+    // columns.forEach((column) => {
+    //   if (column.dataIndex) {
+    //     // Lấy đối tượng filterDropdownProps từ getColumnSearchProps
+    //     const { filterDropdownProps } = getColumnSearchProps(column.dataIndex);
+        
+    //     // Lấy clearFilters từ filterDropdownProps
+    //     const { clearFilters } = filterDropdownProps;
+        
+    //     // Gọi clearFilters để xóa bộ lọc của cột
+    //     clearFilters();
+    //   }
+    // });
+  
+    // Sau đó set lại searchText và searchedColumn về giá trị mặc định
     setSearchText("");
     setSearchedColumn("");
-
-    // Xóa tất cả các sorters
-    // Cập nhật lại state của data để hiển thị lại dữ liệu gốc
-    // Lấy dữ liệu gốc
-    // let newData = [...originData];
-
-    // // Cập nhật lại state của data để hiển thị lại dữ liệu gốc
-    // setData(newData);
-    // console.log(newData);
   };
+  
+  
+  
   const expandedRowRender = (record) => {
     const columns = [
       // {
@@ -477,7 +485,7 @@ const Hotels = () => {
   return (
     <Form form={form} component={false}>
       <Space style={{ marginBottom: 16 }}>
-        <Button onClick={() => clearFiltersAndSorters()}>
+        <Button onClick={clearFiltersAndSorters}>
           Clear filters and sorters
         </Button>
 

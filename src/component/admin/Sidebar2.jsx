@@ -21,6 +21,7 @@ import Bookings from "./Bookings";
 import StatisticsHotel from "./StatisticsHotel";
 import StatisticsRoom from "./StatisticsRoom";
 import StatisticsRevenue from "./StatisticsRevenue";
+import Roomcensorship from "./Roomcensorship";
 const { Header, Content, Footer, Sider } = Layout;
 function getItem(label, key, icon, children) {
   return {
@@ -41,7 +42,11 @@ const items = [
     getItem("Hotels", "hotel1"),
     getItem("Bookings", "booking1"),
   ]),
-  getItem("Hotel censorship", "hotelcensorship1", <CheckSquareOutlined />),
+  getItem("Censorship", "censorship1", <CheckSquareOutlined />, [
+    getItem("Hotels censorship", "hotelcensorship1"),
+    getItem("Rooms censorship", "roomcensorship1"),
+  ]),
+  // getItem("Hotel censorship", "hotelcensorship1", <CheckSquareOutlined />),
   getItem("Statistics", "statistics1", <PieChartOutlined />, [
     getItem("Hotels", "hotelstatistics"),
     getItem("Rooms", "roomstatistics"),
@@ -105,6 +110,8 @@ const Sidebar2 = () => {
         return <Bookings />;
       case "hotelcensorship1":
         return <Hotelcensorship />;
+      case "roomcensorship1":
+        return <Roomcensorship />;
       case "hotelstatistics":
         return <StatisticsHotel />;
       case "roomstatistics":
